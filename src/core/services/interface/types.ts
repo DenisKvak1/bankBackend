@@ -49,9 +49,9 @@ export type ICardService = {
 }
 
 export type IDebitService = {
-    debitRequest(cardNumber: number, cardReceiver: number, sum: number): void
-    debitResponse(token: number): void
-    getDebitRequest(id:number): Promise<IDebitRequest>
+    debitRequest(cardNumber: number, cardReceiver: number, sum: number): Promise<IDebitRequest>
+    debitResponse(token: number, accept: boolean): void
+    getDebitRequest(id:number): Promise<IDebitRequest | undefined>
 }
 
 export type IATMService = {

@@ -1,10 +1,12 @@
-export function generateCreditCardNumber(): number {
+export function generateCreditCardNumber(): string {
 	let cardNumber = '';
 
-	cardNumber += Math.floor(Math.random() * 9) + 1;
-
-	for (let i = 0; i < 15; i++) {
-		cardNumber += Math.floor(Math.random() * 10);
+	for (let i = 0; i < 16; i++) {
+		if (i === 0) {
+			cardNumber += Math.floor(Math.random() * 9) + 1;
+		} else {
+			cardNumber += Math.floor(Math.random() * 10);
+		}
 	}
 
 	const cardDigits = cardNumber.split('').map(Number);
@@ -22,6 +24,5 @@ export function generateCreditCardNumber(): number {
 	const checksum = (sum * 9) % 10;
 	cardNumber += checksum;
 
-	return +cardNumber;
+	return cardNumber;
 }
-

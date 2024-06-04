@@ -39,6 +39,8 @@ export const getAllDebitRequestsSQL = `
 				'number', Card_receiver.number,
 				'dateExpired', Card_receiver.date_expired
 				) AS card_receiver,
+				DebitRequests.finished,
+				DebitRequests.success,
 				DebitRequests.sum
 			FROM DebitRequests
 			INNER JOIN Cards AS Card_destination ON Card_destination.number = DebitRequests.card_number
@@ -52,3 +54,9 @@ export const getByIDDebitRequestSQL = `
 	${getAllDebitRequestsSQL}
 	WHERE DebitRequests.id = $1
 `;
+export const updateDebitRequestFinished = `
+	UPDATE DebitRequests SET finished = $2 WHERE DebitRequests.id = $1;
+`
+export const updateDebitRequestSuccess = `
+	UPDATE DebitRequests SET success = $2 WHERE DebitRequests.id = $1;
+`

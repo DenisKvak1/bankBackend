@@ -27,8 +27,8 @@ export class HttpCardController {
 			const card = await this.cardService.createCard(account.id, dateExpired);
 
 			res.json({ status: 'ok', card: card });
-		} catch (e){
-			res.json({status: 'error'})
+		} catch (e) {
+			res.json({ status: 'error' });
 		}
 	}
 
@@ -57,31 +57,65 @@ export class HttpCardController {
 
 			await this.transferService.transferOnCard(destinationNumber, receiverNumber, sum);
 			res.json({ status: 'ok' });
-		} catch (e){
+		} catch (e) {
 			res.json({ status: 'error' });
+		}
+	}
+
+	async getDebitStatus(req: express.Request, res: express.Response) {
+		try {
+			const id = +req.params.id;
+			const debitRequest = await this.debitService.getDebitRequest(id);
+
+			res.json({ status: 'ok', finished: debitRequest.finished, success: Boolean(debitRequest.success)});
+		} catch (e) {
+			res.json({ status: 'error', errorText: e.message });
+		}
+	}
+
+	async checkValidRequisites(req: express.Request, res: express.Response) {
+		try {
+			const { number, cvv2, date } = req.body.requisites;
+			const isValid = await this.cardService.checkCorrectCardData(number, cvv2, date);
+
+			res.json({ status: 'ok', isValid });
+		} catch (e) {
+			res.json({ status: 'error', errorText: e.message });
+		}
+	}
+	async checkExistence(req: express.Request, res: express.Response){
+		try {
+			const { number } = req.body.requisites;
+			const isValid = Boolean(await this.cardService.getByNumber(number))
+
+			res.json({ status: 'ok', isValid });
+		} catch (e) {
+			res.json({ status: 'error', errorText: e.message });
 		}
 	}
 
 	async debitRequest(req: express.Request, res: express.Response) {
 		try {
-			const { destinationNumber, ccv2, date, receiverNumber, sum } = req.body.debitData;
+			const { destinationNumber, cvv2, date, receiverNumber, sum } = req.body.debitData;
 
 			if (destinationNumber === receiverNumber) return res.json({
 				status: 'error',
 				errorText: 'Карта для списание и карта получателя совпадают',
 			});
-			if (!await this.cardService.checkCorrectCardData(destinationNumber, ccv2, date)) return res.json({
+			if (!await this.cardService.checkCorrectCardData(destinationNumber, cvv2, date)) return res.json({
 				status: 'error',
 				errorText: 'Данные не корректны',
 			});
 			const card = await this.cardService.getByNumber(destinationNumber)
-			const cardOwner = card.account.owner
+			if (card.account.balance < sum) return res.json({
+				status: 'error',
+				errorText: 'Баланс недостаточный',
+			});
+			const debitRequest = await this.debitService.debitRequest(destinationNumber, receiverNumber, sum);
 
-			this.debitService.debitRequest(destinationNumber, receiverNumber, sum);
-
-			res.json({ status: 'ok' });
+			res.json({ status: 'ok', debitRequestID: debitRequest.id });
 		} catch (e) {
-			res.json({ status: 'error', errorText: e.message});
+			res.json({ status: 'error', errorText: e.message });
 		}
 	}
 
@@ -90,7 +124,6 @@ export class HttpCardController {
 			const authorizationData = userAuthService.getData(req.headers['authorization']);
 			const { debitID, accept } = req.body.debitData;
 
-			if (!accept) return res.json({ status: 'ok' });
 			const debitRequest = await this.debitService.getDebitRequest(debitID);
 
 			if (!debitRequest?.card_destination.number) return res.json({ status: 'error', errorText: 'Не верный id' });
@@ -98,7 +131,7 @@ export class HttpCardController {
 				status: 'error',
 				errorText: 'Попытка списать деньги с чужой карты',
 			});
-			this.debitService.debitResponse(debitID);
+			this.debitService.debitResponse(debitID, accept);
 
 			res.json({ status: 'ok' });
 		} catch (e) {

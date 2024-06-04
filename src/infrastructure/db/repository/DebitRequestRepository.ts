@@ -1,19 +1,29 @@
 import { IDebitRequestRepository } from '../../../core/repository/DebitRequestRepository/DebitRequestRepository';
-import { CreateDebitRequestDTO } from '../../../core/repository/DebitRequestRepository/dto/debitRequestDTO';
+import { CreateDebitRequestDTO, UpdateDebitRequestDTO } from '../../../core/repository/DebitRequestRepository/dto/debitRequestDTO';
 import { IDebitRequest } from '../../../core/models/DebitRequestModel';
 import { SQLDataBase } from '../interfaces/sql';
 import {
     createDebitRequestSQL,
     deleteDebitRequestSQL,
     getAllDebitRequestsSQL,
-    getByIDDebitRequestSQL,
+    getByIDDebitRequestSQL, updateDebitRequestFinished, updateDebitRequestSuccess,
 } from '../SQLQuery/DebitRequest.sql';
 
 export class SQLDebitRequestRepository implements IDebitRequestRepository {
-    private sqlDB: SQLDataBase
+    private sqlDB: SQLDataBase;
 
     constructor(sqlDB: SQLDataBase) {
-        this.sqlDB = sqlDB
+        this.sqlDB = sqlDB;
+    }
+
+    async update(id: number, dto: UpdateDebitRequestDTO): Promise<void> {
+        const updateObject = {
+            finished: () => updateDebitRequestFinished,
+            success: () => updateDebitRequestSuccess
+        }
+        for (const dtoKey in dto) {
+            await this.sqlDB.query(updateObject[dtoKey](dto[dtoKey]),[id, dto[dtoKey]])
+        }
     }
 
     async create(dto: CreateDebitRequestDTO): Promise<IDebitRequest> {

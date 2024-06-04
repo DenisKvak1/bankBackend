@@ -5,4 +5,6 @@ export type IDebitRequest = {
     card_destination: ICard
     card_receiver: ICard
     sum: number
+    finished: boolean
+    success: boolean
 }

@@ -2,6 +2,8 @@ import { ICardService } from './interface/types';
 import { ICard } from '../models/CardModel';
 import { ICardRepository } from '../repository/CardRepository/CardRepository';
 import { repositories } from '../../../env/config';
+import { stringCardToDateObject } from '../../../env/helpers/stringCardDateToObject';
+import { areMonthsEqual } from '../../../env/helpers/areMonthsEqual';
 
 
 export class CardService implements ICardService {
@@ -37,11 +39,12 @@ export class CardService implements ICardService {
 		return Date.parse(card.dateExpired) < Date.now()
 	}
 
-	async checkCorrectCardData(number: number, cvv2: number): Promise<boolean> {
+	async checkCorrectCardData(number: number, cvv2: number, date: string): Promise<boolean> {
 		const card = await this.cardRepository.getByNumber(number);
 
 		if (!card) return false;
 		if (card.cvv2 !== cvv2) return false;
+		if(areMonthsEqual(stringCardToDateObject(date), new Date(card.dateExpired))) return false
 		if (Date.parse(card.dateExpired) < Date.now()) return false;
 
 		return true;

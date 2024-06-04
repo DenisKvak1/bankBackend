@@ -3,3 +3,7 @@ export type CreateDebitRequestDTO = {
     cardReceiver: number
     sum: number
 }
+export type UpdateDebitRequestDTO = {
+    finished?: boolean
+    success?: boolean
+}

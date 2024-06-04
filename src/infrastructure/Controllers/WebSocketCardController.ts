@@ -55,7 +55,6 @@ export class WebSocketCardController {
 		try {
 			const { debitID, accept } = wsMessage.debitData;
 
-			if (!accept) return wsClients.dispatchByID(authorizationData.id, { status: 'ok' });
 			const debitRequest = await this.debitService.getDebitRequest(debitID);
 
 			if (!debitRequest?.card_destination.number) {
@@ -72,7 +71,7 @@ export class WebSocketCardController {
 				});
 			}
 
-			this.debitService.debitResponse(debitID);
+			this.debitService.debitResponse(debitID, accept);
 
 			wsClients.dispatchByID(debitRequest.card_receiver.account.owner.id, {
 				status: 'ok',
