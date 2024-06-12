@@ -67,7 +67,7 @@ export class HttpCardController {
 			const id = +req.params.id;
 			const debitRequest = await this.debitService.getDebitRequest(id);
 
-			res.json({ status: 'ok', finished: debitRequest.finished, success: Boolean(debitRequest.success)});
+			res.json({ status: 'ok', finished: debitRequest.finished, success: Boolean(debitRequest.success) });
 		} catch (e) {
 			res.json({ status: 'error', errorText: e.message });
 		}
@@ -83,12 +83,25 @@ export class HttpCardController {
 			res.json({ status: 'error', errorText: e.message });
 		}
 	}
-	async checkExistence(req: express.Request, res: express.Response){
+
+	async checkExistence(req: express.Request, res: express.Response) {
 		try {
 			const { number } = req.body.requisites;
-			const isValid = Boolean(await this.cardService.getByNumber(number))
+			const isValid = Boolean(await this.cardService.getByNumber(number));
 
 			res.json({ status: 'ok', isValid });
+		} catch (e) {
+			res.json({ status: 'error', errorText: e.message });
+		}
+	}
+
+	async checkSufficientBalance(req: express.Request, res: express.Response) {
+		try {
+			const { number, sum } = req.body.requisites;
+			const card = await this.cardService.getByNumber(number);
+			const isSufficient = card.account.balance >= sum;
+
+			res.json({ status: 'ok', isSufficient });
 		} catch (e) {
 			res.json({ status: 'error', errorText: e.message });
 		}
@@ -106,7 +119,7 @@ export class HttpCardController {
 				status: 'error',
 				errorText: 'Данные не корректны',
 			});
-			const card = await this.cardService.getByNumber(destinationNumber)
+			const card = await this.cardService.getByNumber(destinationNumber);
 			if (card.account.balance < sum) return res.json({
 				status: 'error',
 				errorText: 'Баланс недостаточный',

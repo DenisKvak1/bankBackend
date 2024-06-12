@@ -28,5 +28,4 @@ export class DebitService implements IDebitService {
 		return await this.debitRequestRepository.getByID(id);
 	}
 }
-
 export const debitService = new DebitService(repositories.debitRequestRepository, transferService);

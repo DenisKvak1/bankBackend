@@ -3,6 +3,7 @@ import { httpCreditController } from '../../Controllers/httpCardController';
 
 export const cardRouter = express.Router()
 cardRouter.post('/validateRequisites', (req, res) => httpCreditController.checkValidRequisites(req, res))
+cardRouter.post('/checkSufficientBalance', (req, res) => httpCreditController.checkSufficientBalance(req, res))
 
 cardRouter.post('/checkExist', (req, res) => httpCreditController.checkExistence(req, res))
 cardRouter.post('/debitRequest', (req, res) => httpCreditController.debitRequest(req, res))

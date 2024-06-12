@@ -11,6 +11,7 @@ export function authenticationMiddleware(req: express.Request, res: express.Resp
     if(req.path === "/card/checkExist") return next()
     if(req.path === "/card/debitRequest") return next()
     if(req.path === ('/card/validateRequisites')) return next()
+    if(req.path === '/card/checkSufficientBalance') return next()
     if(req.path.startsWith('/card/checkDebitStatus')) return next()
 
     if(isAuth) return next()
